@@ -2,7 +2,6 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace SimplePaint
 {
-    //git리포지토리를 늦게 만들어서 다시 커밋
     public partial class Form1 : Form
     {
         public Form1()
