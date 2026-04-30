@@ -13,6 +13,7 @@ namespace SimplePaint
         Color selectedColor = Color.Black;
         int lineThickness = 1;
         string shape = "Line";
+        float zoomScale = 1.0f;
 
         Bitmap bitmap;
 
@@ -71,11 +72,13 @@ namespace SimplePaint
         private void picCanvas_MouseDown(object sender, MouseEventArgs e)
         {
             isDrawing = true;
+            startPos = new Point((int)(e.X / zoomScale), (int)(e.Y / zoomScale));
             startPos = e.Location; // 마우스가 눌린 현재 위치 저장
         }
 
         private void picCanvas_MouseUp(object sender, MouseEventArgs e)
         {
+            Point endPos = new Point((int)(e.X / zoomScale), (int)(e.Y / zoomScale));
             if (!isDrawing) return;
 
             using (Graphics g = Graphics.FromImage(bitmap))
@@ -140,6 +143,7 @@ namespace SimplePaint
         {
             if (isDrawing)
             {
+                currentPos = new Point((int)(e.X / zoomScale), (int)(e.Y / zoomScale));
                 currentPos = e.Location; // 마우스 이동 중 좌표 저장
                 picCanvas.Invalidate();  // 픽처박스의 Paint 이벤트를 강제로 발생시킴
             }
@@ -154,18 +158,57 @@ namespace SimplePaint
                 Pen guidePen = new Pen(selectedColor, lineThickness);
                 guidePen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
 
-                int width = Math.Abs(currentPos.X - startPos.X);
-                int height = Math.Abs(currentPos.Y - startPos.Y);
-                int left = Math.Min(startPos.X, currentPos.X);
-                int top = Math.Min(startPos.Y, currentPos.Y);
+                int x = (int)(Math.Min(startPos.X, currentPos.X) * zoomScale);
+                int y = (int)(Math.Min(startPos.Y, currentPos.Y) * zoomScale);
+                int w = (int)(Math.Abs(startPos.X - currentPos.X) * zoomScale);
+                int h = (int)(Math.Abs(startPos.Y - currentPos.Y) * zoomScale);
 
                 if (shape == "Line")
                     g.DrawLine(guidePen, startPos, currentPos);
                 else if (shape == "Rectangle")
-                    g.DrawRectangle(guidePen, left, top, width, height);
+                    g.DrawRectangle(guidePen, x, y, w, h);
                 else if (shape == "Circle")
-                    g.DrawEllipse(guidePen, left, top, width, height);
+                    g.DrawEllipse(guidePen, x, y, w, h);
             }
+        }
+
+        private void btnOpenFile_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    Bitmap loadedImg = new Bitmap(ofd.FileName);
+                    bitmap = new Bitmap(loadedImg.Width, loadedImg.Height);
+                    using (Graphics g = Graphics.FromImage(bitmap)) { g.DrawImage(loadedImg, 0, 0); }
+                    picCanvas.Size = bitmap.Size; // 픽처박스 크기를 이미지에 맞춤
+                    picCanvas.Image = bitmap;
+                    zoomScale = 1.0f;
+                }
+            }
+        }
+
+        private void picCanvas_Click(object sender, EventArgs e)
+        {
+
+        }
+        private void UpdateZoom(float factor)
+        {
+            zoomScale *= factor; // 배율을 곱함 (예: 1.0 * 1.1 = 1.1배)
+
+            // 실제 비트맵 크기에 배율을 곱해서 픽처박스 크기를 진짜로 키움
+            picCanvas.Width = (int)(bitmap.Width * zoomScale);
+            picCanvas.Height = (int)(bitmap.Height * zoomScale);
+        }
+
+        private void btnZoomIn_Click(object sender, EventArgs e)
+        {
+            UpdateZoom(1.1f); // 10% 확대
+        }
+
+        private void btnZoomOut_Click(object sender, EventArgs e)
+        {
+            UpdateZoom(0.9f); // 10% 축소
         }
     }
 }
