@@ -1,1 +1,44 @@
-# SimplePaint
+# (C# 코딩) 그림판
+
+
+## 개요
+
+-C# 프로그래밍학습
+
+-1줄소개: 직선, 사각형, 원을 그릴 수 있는 간단한 그림판 프로그램
+
+-사용한플랫폼: 
+	-C#, .NET Windows Forms, Visual Studio, GitHub
+
+-사용한컨트롤:
+	-Label, Button, ComboBox, PictureBox, GroupBox, TrackBar
+
+- 사용한기술과구현한기능:
+-
+-
+
+
+##실행 화면 (과제1)
+- 코드의 실행스크린샷과 구현내용설명
+![실행화면](img/ss1.png)
+- 구현한내용(위그림참조)
+	- Label, Button, ComboBox, PictureBox, GroupBox, TrackBar 컨트롤 사용하여 UI 구성
+	- 그릴 도형, 색상, 선 굵기 선택 기능 구현
+
+
+##실행 화면 (과제2)
+- 코드의 실행스크린샷과 구현내용설명
+![실행화면](img/screenshot-1.png)
+- 구현한내용(위그림참조)
+
+
+##실행 화면 (과제3)
+- 코드의 실행스크린샷과 구현내용설명
+![실행화면](img/screenshot-1.png)
+- 구현한내용(위그림참조)
+
+
+##실행 화면 (과제4)
+- 코드의 실행스크린샷과 구현내용설명
+![실행화면](img/screenshot-1.png)
+- 구현한내용(위그림참조)
