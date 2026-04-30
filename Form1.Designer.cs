@@ -169,6 +169,7 @@
             btnSaveFile.TabIndex = 4;
             btnSaveFile.Text = "저장";
             btnSaveFile.UseVisualStyleBackColor = true;
+            btnSaveFile.Click += btnSaveFile_Click;
             // 
             // picCanvas
             // 
@@ -178,7 +179,9 @@
             picCanvas.Size = new Size(785, 292);
             picCanvas.TabIndex = 5;
             picCanvas.TabStop = false;
+            picCanvas.Paint += picCanvas_Paint;
             picCanvas.MouseDown += picCanvas_MouseDown;
+            picCanvas.MouseMove += picCanvas_MouseMove;
             picCanvas.MouseUp += picCanvas_MouseUp;
             // 
             // Form1

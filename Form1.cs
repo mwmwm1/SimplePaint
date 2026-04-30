@@ -14,6 +14,8 @@ namespace SimplePaint
         int lineThickness = 1;
         string shape = "Line";
 
+        Bitmap bitmap;
+
         public Form1()
         {
             InitializeComponent();
@@ -52,8 +54,13 @@ namespace SimplePaint
         {
             cmbColor.Items.Clear();
             cmbColor.Items.AddRange(new string[] { "Black", "Red", "Blue", "Green" });
-
             cmbColor.SelectedIndex = 0; // 기본값으로 'Black' 선택
+            bitmap = new Bitmap(picCanvas.Width, picCanvas.Height);
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.Clear(Color.White); // 배경을 흰색으로 초기화
+            }
+            picCanvas.Image = bitmap; // 픽처박스에 비트맵 연결
         }
 
         private void trbLineWidth_Scroll(object sender, EventArgs e)
@@ -71,21 +78,17 @@ namespace SimplePaint
         {
             if (!isDrawing) return;
 
-            using (Graphics g = picCanvas.CreateGraphics())
+            using (Graphics g = Graphics.FromImage(bitmap))
             {
-                // 선을 부드럽게 만드는 옵션
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-                // 현재 설정된 색상과 두께로 펜 생성
                 Pen pen = new Pen(selectedColor, lineThickness);
 
-                // 사각형/원 계산을 위한 좌표 처리
                 int width = Math.Abs(e.X - startPos.X);
                 int height = Math.Abs(e.Y - startPos.Y);
                 int left = Math.Min(startPos.X, e.X);
                 int top = Math.Min(startPos.Y, e.Y);
 
-                // 도형 종류에 따라 그리기
                 if (shape == "Line")
                 {
                     g.DrawLine(pen, startPos, e.Location);
@@ -100,7 +103,69 @@ namespace SimplePaint
                 }
             }
 
-            isDrawing = false; // 그리기 종료
-    }
+            isDrawing = false;
+
+            // 비트맵에 그린 내용을 화면에 즉시 반영합니다.
+            picCanvas.Invalidate();
+        }
+
+        private void btnSaveFile_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog sfd = new SaveFileDialog())
+            {
+                sfd.Title = "이미지 저장하기";
+                sfd.OverwritePrompt = true;
+                sfd.Filter = "PNG 파일 (*.png)|*.png|JPEG 파일 (*.jpg)|*.jpg|Bitmap 파일 (*.bmp)|*.bmp";
+                sfd.DefaultExt = "png";
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    // 선택한 확장자에 맞춰 포맷 결정
+                    ImageFormat format = ImageFormat.Png;
+                    string extension = System.IO.Path.GetExtension(sfd.FileName).ToLower();
+
+                    switch (extension)
+                    {
+                        case ".jpg": format = ImageFormat.Jpeg; break;
+                        case ".bmp": format = ImageFormat.Bmp; break;
+                    }
+
+                    // 비트맵 저장
+                    bitmap.Save(sfd.FileName, format);
+                }
+            }
+        }
+
+        private void picCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDrawing)
+            {
+                currentPos = e.Location; // 마우스 이동 중 좌표 저장
+                picCanvas.Invalidate();  // 픽처박스의 Paint 이벤트를 강제로 발생시킴
+            }
+        }
+
+        private void picCanvas_Paint(object sender, PaintEventArgs e)
+        {
+            if (isDrawing)
+            {
+                Graphics g = e.Graphics;
+                // 드래그 중임을 보여주기 위해 회색 점선 펜 생성 (선택 사항)
+                Pen guidePen = new Pen(selectedColor, lineThickness);
+                guidePen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+
+                int width = Math.Abs(currentPos.X - startPos.X);
+                int height = Math.Abs(currentPos.Y - startPos.Y);
+                int left = Math.Min(startPos.X, currentPos.X);
+                int top = Math.Min(startPos.Y, currentPos.Y);
+
+                if (shape == "Line")
+                    g.DrawLine(guidePen, startPos, currentPos);
+                else if (shape == "Rectangle")
+                    g.DrawRectangle(guidePen, left, top, width, height);
+                else if (shape == "Circle")
+                    g.DrawEllipse(guidePen, left, top, width, height);
+            }
+        }
     }
 }
